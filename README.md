@@ -1,43 +1,43 @@
-# Asia Serious Dating MVP
+# 亞洲認真交友 MVP
 
-High-trust, serious relationship and marriage-focused MVP for Taiwan, Singapore, and Malaysia first, with structure ready for Japan, the Philippines, and Vietnam.
+這是一個高信任、認真交往與婚戀導向的 MVP，第一階段面向台灣、新加坡、馬來西亞，並保留未來擴展到日本、菲律賓、越南的結構。
 
-This is not an infinite swipe app. The first version focuses on authentic profiles, relationship intent, limited daily recommendations, mutual-like conversations, and safety signals from day one.
+這不是無限 swipe app。第一版聚焦真人資料、關係意圖、每日限量推薦、mutual like 後聊天，以及從第一天就放進系統核心的安全訊號。
 
-## Stack
+## 技術架構
 
-- Monorepo: npm workspaces
-- Mobile: Expo React Native + TypeScript
-- API: NestJS + TypeScript
-- DB: PostgreSQL + Prisma, with PostGIS-ready fields
-- Redis: interface-ready, local MVP can use in-memory fallback
-- Shared package: DTOs, enums, safety constants
+- Monorepo：npm workspaces
+- Mobile：Expo React Native + TypeScript
+- API：NestJS + TypeScript
+- DB：PostgreSQL + Prisma，並預留 PostGIS 欄位
+- Redis：已預留介面方向，本地 MVP 可先使用 in-memory fallback
+- Shared package：共用 DTO、enum、安全常數
 
-## From a New Computer
+## 從新電腦接手
 
-Goal: clone and run local development in about 15 minutes.
+目標：clone repo 後約 15 分鐘內跑起本地開發環境。
 
-1. Install Node `22.14.x` and npm `10.x`.
-2. Clone the repo.
-3. Copy environment variables:
+1. 安裝 Node `22.14.x` 與 npm `10.x`。
+2. Clone 這個 repo。
+3. 複製環境變數範本：
 
    ```powershell
    Copy-Item .env.example .env
    ```
 
-4. Install dependencies:
+4. 安裝依賴：
 
    ```powershell
    npm install
    ```
 
-5. Start PostgreSQL and Redis when you want DB-backed development:
+5. 若要使用 DB-backed 開發模式，啟動 PostgreSQL 與 Redis：
 
    ```powershell
    docker compose up -d
    ```
 
-6. Generate Prisma client and apply committed migrations/seed:
+6. 產生 Prisma client，套用已提交的 migrations，並執行 seed：
 
    ```powershell
    npm run db:generate
@@ -45,32 +45,32 @@ Goal: clone and run local development in about 15 minutes.
    npm run db:seed
    ```
 
-7. Start the API:
+7. 啟動 API：
 
    ```powershell
    npm run dev:api
    ```
 
-8. Start the mobile app:
+8. 啟動 mobile app：
 
    ```powershell
    npm run dev:mobile
    ```
 
-   Expo Metro listens on `http://localhost:8081`. That URL is the native bundler/dev-server endpoint, not the browser-rendered app UI for this MVP. Use the QR code with Expo Go or run an iOS/Android simulator from Expo. Browser web runtime is not enabled in round 1.
+   Expo Metro 會監聽 `http://localhost:8081`。這個 URL 是 native bundler/dev-server endpoint，不是此 MVP 的瀏覽器版 app UI。請使用 Expo Go 掃 QR code，或從 Expo 啟動 iOS/Android simulator。第一輪尚未啟用 browser web runtime。
 
-9. Verify:
+9. 驗證：
 
    ```powershell
    npm run typecheck
    npm test
    ```
 
-## Local Modes
+## 本地模式
 
-By default `.env.example` sets `DATABASE_PROVIDER=memory`. This lets the API run immediately without requiring PostgreSQL while the MVP API surface is still evolving.
+`.env.example` 預設使用 `DATABASE_PROVIDER=memory`。這讓 API 在 PostgreSQL 尚未啟動時也能先跑起來，方便第一輪 API/mobile 流程開發。
 
-Use Docker/Postgres/Redis when working on persistence behavior:
+當你要開發或驗證 persistence 行為時，請切到 Docker/Postgres/Redis：
 
 ```env
 DATABASE_PROVIDER=postgres
@@ -78,17 +78,17 @@ DATABASE_URL=postgresql://asia_app:asia_app@localhost:5432/asia_serious_dating?s
 REDIS_URL=redis://localhost:6379
 ```
 
-## Required Environment Variables
+## 必要環境變數
 
-- `API_PORT`: API port, default `4000`.
-- `DATABASE_PROVIDER`: `memory` for local fallback or `postgres` for Prisma-backed development.
-- `DATABASE_URL`: PostgreSQL connection string used by Prisma.
-- `REDIS_URL`: Redis connection string for future cache/rate-limit adapter.
-- `JWT_SECRET`: local mock auth signing secret. Do not commit real secrets.
-- `DAILY_RECOMMENDATION_LIMIT`: default daily candidates count, currently `5`.
-- `EXPO_PUBLIC_API_BASE_URL`: mobile API endpoint.
+- `API_PORT`：API port，預設 `4000`。
+- `DATABASE_PROVIDER`：`memory` 代表本地 fallback，`postgres` 代表 Prisma-backed 開發模式。
+- `DATABASE_URL`：Prisma 使用的 PostgreSQL connection string。
+- `REDIS_URL`：未來 cache/rate-limit adapter 使用的 Redis connection string。
+- `JWT_SECRET`：本地 mock auth signing secret。不要提交真實 secrets。
+- `DAILY_RECOMMENDATION_LIMIT`：每日推薦數，預設 `5`。
+- `EXPO_PUBLIC_API_BASE_URL`：mobile app 使用的 API endpoint。
 
-## Useful Commands
+## 常用指令
 
 ```powershell
 npm install
@@ -102,13 +102,13 @@ npm run db:deploy
 npm run db:seed
 ```
 
-Mobile note: `http://localhost:8081` is expected to show Metro/bundler behavior in a desktop browser, not the actual app screen. The MVP mobile UI is tested through Expo Go or a simulator.
+Mobile 注意：`http://localhost:8081` 在桌面瀏覽器中預期會呈現 Metro/bundler 行為，而不是實際 app 畫面。MVP mobile UI 請透過 Expo Go 或 simulator 測試。
 
-Use `npm run db:migrate` only when intentionally creating a new Prisma migration during schema development.
+只有在刻意修改 Prisma schema 並要建立新 migration 時，才使用 `npm run db:migrate`。
 
-## Docs
+## 文件
 
-- [Architecture](docs/architecture.md)
-- [Product MVP](docs/product-mvp.md)
-- [Safety Model](docs/safety-model.md)
-- [Dev Notes](docs/dev-notes.md)
+- [系統架構](docs/architecture.md)
+- [產品 MVP](docs/product-mvp.md)
+- [安全模型](docs/safety-model.md)
+- [開發備註](docs/dev-notes.md)
