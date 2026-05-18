@@ -1,0 +1,262 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CountryCode {
+  TW
+  SG
+  MY
+  JP
+  PH
+  VN
+}
+
+enum RelationshipIntent {
+  MARRIAGE             @map("marriage")
+  SERIOUS_RELATIONSHIP @map("serious_relationship")
+  OPEN_TO_RELATIONSHIP @map("open_to_relationship")
+  FRIENDSHIP           @map("friendship")
+}
+
+enum Gender {
+  WOMAN             @map("woman")
+  MAN               @map("man")
+  NON_BINARY        @map("non_binary")
+  PREFER_NOT_TO_SAY @map("prefer_not_to_say")
+}
+
+enum VerificationType {
+  EMAIL   @map("email")
+  PHONE   @map("phone")
+  SELFIE  @map("selfie")
+  ID_MOCK @map("id_mock")
+}
+
+enum VerificationStatus {
+  PENDING  @map("pending")
+  VERIFIED @map("verified")
+  REJECTED @map("rejected")
+}
+
+enum LikeDecision {
+  LIKE @map("like")
+  PASS @map("pass")
+}
+
+enum MatchStatus {
+  ACTIVE  @map("active")
+  BLOCKED @map("blocked")
+}
+
+enum ConversationStatus {
+  ACTIVE   @map("active")
+  BLOCKED  @map("blocked")
+  REPORTED @map("reported")
+}
+
+enum SafetySignalType {
+  INVESTMENT         @map("investment")
+  CRYPTO             @map("crypto")
+  MONEY_TRANSFER     @map("money_transfer")
+  EXTERNAL_MESSAGING @map("external_messaging")
+  SUSPICIOUS_APK     @map("suspicious_apk")
+  HARASSMENT         @map("harassment")
+  MANUAL_REPORT      @map("manual_report")
+}
+
+enum SafetySignalSeverity {
+  LOW    @map("low")
+  MEDIUM @map("medium")
+  HIGH   @map("high")
+}
+
+enum ReportReason {
+  SCAM             @map("scam")
+  HARASSMENT       @map("harassment")
+  FAKE_PROFILE     @map("fake_profile")
+  EXPLICIT_CONTENT @map("explicit_content")
+  OTHER            @map("other")
+}
+
+model User {
+  id           String     @id @default(uuid()) @db.Uuid
+  email        String     @unique
+  passwordHash String
+  displayName  String
+  locale       String     @default("zh-TW")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  profile      Profile?
+  auditLogs    AuditLog[]
+}
+
+model Profile {
+  id             String             @id @default(uuid()) @db.Uuid
+  userId         String             @unique @db.Uuid
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName    String
+  birthYear      Int
+  gender         Gender
+  city           String
+  country        CountryCode
+  latitude       Decimal?           @db.Decimal(9, 6)
+  longitude      Decimal?           @db.Decimal(9, 6)
+  location       Unsupported("geography(Point,4326)")?
+  intent         RelationshipIntent
+  languages      String[]
+  bio            String
+  isVisible      Boolean            @default(true)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  photos         ProfilePhoto[]
+  preference     Preference?
+  verifications  Verification[]
+  likesSent      Like[]             @relation("LikeActor")
+  likesReceived  Like[]             @relation("LikeTarget")
+  matchMembers   MatchProfile[]
+  sentMessages   Message[]
+  blocksCreated  Block[]            @relation("BlockActor")
+  blocksReceived Block[]            @relation("BlockTarget")
+  reportsCreated Report[]           @relation("ReportActor")
+  reportsReceived Report[]          @relation("ReportTarget")
+  safetySignals  SafetySignal[]     @relation("SafetySignalTarget")
+}
+
+model ProfilePhoto {
+  id        String   @id @default(uuid()) @db.Uuid
+  profileId String   @db.Uuid
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  url       String
+  position  Int
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Preference {
+  id            String               @id @default(uuid()) @db.Uuid
+  profileId     String               @unique @db.Uuid
+  profile       Profile              @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  minAge        Int
+  maxAge        Int
+  countries     CountryCode[]
+  cities        String[]
+  maxDistanceKm Int
+  intents       RelationshipIntent[]
+  languages     String[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+}
+
+model Verification {
+  id        String             @id @default(uuid()) @db.Uuid
+  profileId String             @db.Uuid
+  profile   Profile            @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  type      VerificationType
+  status    VerificationStatus @default(PENDING)
+  provider  String             @default("mock")
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model Like {
+  id              String       @id @default(uuid()) @db.Uuid
+  actorProfileId  String       @db.Uuid
+  targetProfileId String       @db.Uuid
+  actor           Profile      @relation("LikeActor", fields: [actorProfileId], references: [id], onDelete: Cascade)
+  target          Profile      @relation("LikeTarget", fields: [targetProfileId], references: [id], onDelete: Cascade)
+  decision        LikeDecision
+  createdAt       DateTime     @default(now())
+
+  @@unique([actorProfileId, targetProfileId])
+}
+
+model Match {
+  id            String         @id @default(uuid()) @db.Uuid
+  status        MatchStatus    @default(ACTIVE)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  participants  MatchProfile[]
+  conversation  Conversation?
+}
+
+model MatchProfile {
+  matchId   String  @db.Uuid
+  profileId String  @db.Uuid
+  match     Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@id([matchId, profileId])
+}
+
+model Conversation {
+  id        String             @id @default(uuid()) @db.Uuid
+  matchId   String             @unique @db.Uuid
+  match     Match              @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  status    ConversationStatus @default(ACTIVE)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  messages  Message[]
+}
+
+model Message {
+  id              String         @id @default(uuid()) @db.Uuid
+  conversationId  String         @db.Uuid
+  conversation    Conversation   @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderProfileId String         @db.Uuid
+  sender          Profile        @relation(fields: [senderProfileId], references: [id], onDelete: Cascade)
+  body            String
+  createdAt       DateTime       @default(now())
+  safetySignals   SafetySignal[]
+}
+
+model Block {
+  id              String   @id @default(uuid()) @db.Uuid
+  actorProfileId  String   @db.Uuid
+  targetProfileId String   @db.Uuid
+  actor           Profile  @relation("BlockActor", fields: [actorProfileId], references: [id], onDelete: Cascade)
+  target          Profile  @relation("BlockTarget", fields: [targetProfileId], references: [id], onDelete: Cascade)
+  reason          String?
+  createdAt       DateTime @default(now())
+
+  @@unique([actorProfileId, targetProfileId])
+}
+
+model Report {
+  id              String       @id @default(uuid()) @db.Uuid
+  actorProfileId  String       @db.Uuid
+  targetProfileId String       @db.Uuid
+  actor           Profile      @relation("ReportActor", fields: [actorProfileId], references: [id], onDelete: Cascade)
+  target          Profile      @relation("ReportTarget", fields: [targetProfileId], references: [id], onDelete: Cascade)
+  reason          ReportReason
+  details         String?
+  createdAt       DateTime     @default(now())
+}
+
+model SafetySignal {
+  id              String               @id @default(uuid()) @db.Uuid
+  type            SafetySignalType
+  severity        SafetySignalSeverity
+  source          String
+  targetProfileId String?              @db.Uuid
+  targetProfile   Profile?             @relation("SafetySignalTarget", fields: [targetProfileId], references: [id], onDelete: SetNull)
+  messageId       String?              @db.Uuid
+  message         Message?             @relation(fields: [messageId], references: [id], onDelete: SetNull)
+  details         String
+  createdAt       DateTime             @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @db.Uuid
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+}

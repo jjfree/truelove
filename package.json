@@ -1,0 +1,39 @@
+{
+  "name": "asia-serious-dating",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MVP monorepo for a high-trust Asian serious dating and marriage app.",
+  "packageManager": "npm@10.9.2",
+  "engines": {
+    "node": "22.14.x",
+    "npm": "10.x"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces",
+    "test": "npm run test --workspaces --if-present",
+    "dev:api": "npm run start:dev --workspace @asia-love/api",
+    "dev:mobile": "npm run start --workspace @asia-love/mobile",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "prisma": "^6.4.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "volta": {
+    "node": "22.14.0",
+    "npm": "10.9.2"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Asia Serious Dating",
+    "slug": "asia-serious-dating",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "platforms": ["ios", "android"],
+    "extra": {
+      "apiBaseUrl": "http://localhost:4000"
+    }
+  }
+}
