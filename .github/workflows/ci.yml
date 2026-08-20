@@ -67,9 +67,23 @@ jobs:
                           walk(obj)
                       except Exception as e: failures.append('json_parse:'+repr(e))
                       if not matches: failures.append('no_matching_rows')
-                  results.append({'request_id':req['request_id'],'source':req['url'],'final_url':final,'fetched_at_utc':now,'status_code':status,'content_type':ctype,'content_length':len(raw),'validation':{'passed':200<=status<300 and not failures,'failures':failures},'match_count':len(matches),'matches':matches[:50],'body_snippet':txt[:int(req.get('body_snippet_bytes',2000))]})
+                  extracted=None
+                  if req.get('extract_yahoo_at'):
+                      try:
+                          obj=json.loads(txt)['chart']['result'][0]
+                          ts=obj.get('timestamp') or []
+                          closes=((obj.get('indicators') or {}).get('quote') or [{}])[0].get('close') or []
+                          target=int(datetime.datetime.fromisoformat(req['extract_yahoo_at'].replace('Z','+00:00')).timestamp())
+                          candidates=[(abs(t-target),i,t,closes[i] if i<len(closes) else None) for i,t in enumerate(ts) if i<len(closes) and closes[i] is not None]
+                          if not candidates: raise ValueError('no timestamp/close candidates')
+                          _,i,t,c=min(candidates)
+                          meta=obj.get('meta') or {}
+                          extracted={'symbol':meta.get('symbol'),'timestamp_utc':datetime.datetime.fromtimestamp(t,datetime.timezone.utc).isoformat(),'close':c,'regularMarketPrice':meta.get('regularMarketPrice'),'previousClose':meta.get('previousClose'),'chartPreviousClose':meta.get('chartPreviousClose'),'exchangeTimezoneName':meta.get('exchangeTimezoneName'),'target_utc':req['extract_yahoo_at']}
+                      except Exception as e:
+                          failures.append('yahoo_extract:'+repr(e))
+                  results.append({'request_id':req['request_id'],'source':req['url'],'final_url':final,'fetched_at_utc':now,'status_code':status,'content_type':ctype,'content_length':len(raw),'validation':{'passed':200<=status<300 and not failures,'failures':failures},'match_count':len(matches),'matches':matches[:50],'extracted':extracted,'body_snippet':txt[:int(req.get('body_snippet_bytes',2000))]})
               except Exception as e:
-                  results.append({'request_id':req['request_id'],'source':req['url'],'fetched_at_utc':now,'validation':{'passed':False,'failures':[repr(e)]},'match_count':0,'matches':[],'body_snippet':''})
+                  results.append({'request_id':req['request_id'],'source':req['url'],'fetched_at_utc':now,'validation':{'passed':False,'failures':[repr(e)]},'match_count':0,'matches':[],'extracted':None,'body_snippet':''})
           out={'batch_id':root.get('batch_id',root.get('request_id')),'fetched_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'results':results}
           open('data/market-fetch-result.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
           PY
