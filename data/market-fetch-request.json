@@ -1,7 +1,9 @@
 {
-  "request_id": "taifex-dailyfut-20260820-0826c",
+  "request_id": "taifex-dailyfut-20260820-compact1",
   "url": "https://openapi.taifex.com.tw/v1/DailyMarketReportFut",
   "method": "GET",
   "timeout_seconds": 30,
-  "expect": {"contains": ["2026/08/20", "TX", "202608"], "min_bytes": 1000}
+  "row_contains": ["TX", "202608"],
+  "expect": {"contains": ["TX", "202608"], "min_bytes": 1000},
+  "body_snippet_bytes": 800
 }
