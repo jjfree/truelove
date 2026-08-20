@@ -1,9 +1,9 @@
 {
-  "request_id": "taifex-dailyfut-20260820-compact1",
+  "request_id": "taifex-tx-night-20260819",
   "url": "https://openapi.taifex.com.tw/v1/DailyMarketReportFut",
   "method": "GET",
   "timeout_seconds": 30,
-  "row_contains": ["TX", "202608"],
-  "expect": {"contains": ["TX", "202608"], "min_bytes": 1000},
-  "body_snippet_bytes": 800
+  "row_contains": ["20260819", "\"Contract\":\"TX\"", "\"ContractMonth(Week)\":\"202608\"", "\"TradingSession\":\"盤後\""],
+  "expect": {"contains": ["20260819", "TX", "202608", "盤後"], "min_bytes": 1000},
+  "body_snippet_bytes": 300
 }
