@@ -55,8 +55,9 @@ jobs:
                           obj=json.loads(txt)
                           def walk(x):
                               if isinstance(x,dict):
-                                  s=json.dumps(x,ensure_ascii=False,separators=(',',':'))
-                                  if all(t in s for t in tokens): matches.append(x)
+                                  if x and all(not isinstance(v,(dict,list)) for v in x.values()):
+                                      s=json.dumps(x,ensure_ascii=False,separators=(',',':'))
+                                      if all(t in s for t in tokens): matches.append(x)
                                   for v in x.values(): walk(v)
                               elif isinstance(x,list):
                                   if x and all(not isinstance(v,(dict,list)) for v in x):
@@ -79,9 +80,9 @@ jobs:
                           _,i,t,c=min(candidates)
                           meta=obj.get('meta') or {}
                           extracted={'symbol':meta.get('symbol'),'timestamp_utc':datetime.datetime.fromtimestamp(t,datetime.timezone.utc).isoformat(),'close':c,'regularMarketPrice':meta.get('regularMarketPrice'),'previousClose':meta.get('previousClose'),'chartPreviousClose':meta.get('chartPreviousClose'),'exchangeTimezoneName':meta.get('exchangeTimezoneName'),'target_utc':req['extract_yahoo_at']}
-                      except Exception as e:
-                          failures.append('yahoo_extract:'+repr(e))
-                  results.append({'request_id':req['request_id'],'source':req['url'],'final_url':final,'fetched_at_utc':now,'status_code':status,'content_type':ctype,'content_length':len(raw),'validation':{'passed':200<=status<300 and not failures,'failures':failures},'match_count':len(matches),'matches':matches[:50],'extracted':extracted,'body_snippet':txt[:int(req.get('body_snippet_bytes',2000))]})
+                      except Exception as e: failures.append('yahoo_extract:'+repr(e))
+                  limit=int(req.get('max_matches',10))
+                  results.append({'request_id':req['request_id'],'source':req['url'],'final_url':final,'fetched_at_utc':now,'status_code':status,'content_type':ctype,'content_length':len(raw),'validation':{'passed':200<=status<300 and not failures,'failures':failures},'match_count':len(matches),'matches':matches[:limit],'extracted':extracted,'body_snippet':txt[:int(req.get('body_snippet_bytes',500))]})
               except Exception as e:
                   results.append({'request_id':req['request_id'],'source':req['url'],'fetched_at_utc':now,'validation':{'passed':False,'failures':[repr(e)]},'match_count':0,'matches':[],'extracted':None,'body_snippet':''})
           out={'batch_id':root.get('batch_id',root.get('request_id')),'fetched_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'results':results}
