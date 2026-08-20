@@ -1,12 +1,12 @@
 {
   "batch_id": "taifex-tx-night-20260819",
-  "fetched_at_utc": "2026-08-20T00:37:58.790423+00:00",
+  "fetched_at_utc": "2026-08-20T00:38:28.065352+00:00",
   "results": [
     {
       "request_id": "taifex-tx-night-20260819",
       "source": "https://openapi.taifex.com.tw/v1/DailyMarketReportFut",
       "final_url": "https://openapi.taifex.com.tw/v1/DailyMarketReportFut",
-      "fetched_at_utc": "2026-08-20T00:37:58.472471+00:00",
+      "fetched_at_utc": "2026-08-20T00:38:27.716856+00:00",
       "status_code": 200,
       "content_type": "application/octet-stream",
       "content_length": 876053,
@@ -19,6 +19,7 @@
       },
       "match_count": 0,
       "matches": [],
+      "extracted": null,
       "body_snippet": "[{\"Date\":\"20260817\",\"Contract\":\"ZFF\",\"ContractMonth(Week)\":\"202608\",\"Open\":\"3182.8\",\"High\":\"3186\",\"Low\":\"3126\",\"Last\":\"3153\",\"Change\":\"-35.4\",\"%\":\"-1.11%\",\"Volume\":\"417\",\"SettlementPrice\":\"3150.6\",\"OpenInterest\":\"294\",\"BestBid\":\"3153\",\"BestAsk\":\"3160.8\",\"HistoricalHigh\":\"3262.2\",\"HistoricalLow\":\"299"
     }
   ]
