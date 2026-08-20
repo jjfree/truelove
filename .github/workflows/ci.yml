@@ -2,6 +2,9 @@ name: CI
 
 on:
   push:
+    paths:
+      - 'data/market-fetch-request.json'
+      - '.github/workflows/ci.yml'
   pull_request:
 
 permissions:
@@ -22,46 +25,52 @@ jobs:
         run: |
           python - <<'PY'
           import json, urllib.request, urllib.parse, datetime
-          req=json.load(open('data/market-fetch-request.json',encoding='utf-8'))
-          url=req['url']
-          if req.get('params'):
-              url += ('&' if '?' in url else '?') + urllib.parse.urlencode(req['params'])
-          body=None
-          headers={'User-Agent':'Mozilla/5.0 GitHubActions market-live-fetch','Accept':'application/json,text/plain,*/*'}
-          if req.get('method','GET').upper()=='POST':
-              if req.get('json') is not None:
-                  body=json.dumps(req['json']).encode(); headers['Content-Type']='application/json'
-              elif req.get('data') is not None:
-                  body=urllib.parse.urlencode(req['data']).encode(); headers['Content-Type']='application/x-www-form-urlencoded'
-          request=urllib.request.Request(url,data=body,headers=headers,method=req.get('method','GET').upper())
-          now=datetime.datetime.now(datetime.timezone.utc).isoformat()
-          try:
-              with urllib.request.urlopen(request,timeout=req.get('timeout_seconds',30)) as r:
-                  raw=r.read(); status=r.status; final=r.geturl(); ctype=r.headers.get('content-type')
-              txt=raw.decode('utf-8','replace')
-              failures=[]
-              for s in req.get('expect',{}).get('contains',[]):
-                  if s not in txt: failures.append('missing:'+s)
-              if len(raw)<req.get('expect',{}).get('min_bytes',0): failures.append('too_short')
-              matches=[]
-              tokens=req.get('row_contains',[])
-              if tokens:
-                  try:
-                      obj=json.loads(txt)
-                      def walk(x):
-                          if isinstance(x,dict):
-                              s=json.dumps(x,ensure_ascii=False,separators=(',',':'))
-                              if all(str(t) in s for t in tokens): matches.append(x)
-                              for v in x.values(): walk(v)
-                          elif isinstance(x,list):
-                              for v in x: walk(v)
-                      walk(obj)
-                  except Exception as e:
-                      failures.append('json_parse:'+repr(e))
-                  if not matches: failures.append('no_matching_rows')
-              out={'request_id':req['request_id'],'source':req['url'],'final_url':final,'fetched_at_utc':now,'status_code':status,'content_type':ctype,'content_length':len(raw),'validation':{'passed':200<=status<300 and not failures,'failures':failures},'match_count':len(matches),'matches':matches[:100],'body_snippet':txt[:int(req.get('body_snippet_bytes',2000))]}
-          except Exception as e:
-              out={'request_id':req['request_id'],'source':req['url'],'fetched_at_utc':now,'validation':{'passed':False,'failures':[repr(e)]},'match_count':0,'matches':[],'body_snippet':''}
+          root=json.load(open('data/market-fetch-request.json',encoding='utf-8'))
+          reqs=root.get('requests') or [root]
+          results=[]
+          for req in reqs:
+              url=req['url']
+              if req.get('params'):
+                  url += ('&' if '?' in url else '?') + urllib.parse.urlencode(req['params'])
+              body=None
+              headers={'User-Agent':'Mozilla/5.0 GitHubActions market-live-fetch','Accept':'application/json,text/plain,*/*'}
+              if req.get('method','GET').upper()=='POST':
+                  if req.get('json') is not None:
+                      body=json.dumps(req['json']).encode(); headers['Content-Type']='application/json'
+                  elif req.get('data') is not None:
+                      body=urllib.parse.urlencode(req['data']).encode(); headers['Content-Type']='application/x-www-form-urlencoded'
+              request=urllib.request.Request(url,data=body,headers=headers,method=req.get('method','GET').upper())
+              now=datetime.datetime.now(datetime.timezone.utc).isoformat()
+              try:
+                  with urllib.request.urlopen(request,timeout=req.get('timeout_seconds',30)) as r:
+                      raw=r.read(); status=r.status; final=r.geturl(); ctype=r.headers.get('content-type')
+                  txt=raw.decode('utf-8','replace')
+                  failures=[]
+                  for s in req.get('expect',{}).get('contains',[]):
+                      if s not in txt: failures.append('missing:'+s)
+                  if len(raw)<req.get('expect',{}).get('min_bytes',0): failures.append('too_short')
+                  matches=[]; tokens=[str(t) for t in req.get('row_contains',[])]
+                  if tokens:
+                      try:
+                          obj=json.loads(txt)
+                          def walk(x):
+                              if isinstance(x,dict):
+                                  s=json.dumps(x,ensure_ascii=False,separators=(',',':'))
+                                  if all(t in s for t in tokens): matches.append(x)
+                                  for v in x.values(): walk(v)
+                              elif isinstance(x,list):
+                                  if x and all(not isinstance(v,(dict,list)) for v in x):
+                                      s=json.dumps(x,ensure_ascii=False,separators=(',',':'))
+                                      if all(t in s for t in tokens): matches.append(x)
+                                  else:
+                                      for v in x: walk(v)
+                          walk(obj)
+                      except Exception as e: failures.append('json_parse:'+repr(e))
+                      if not matches: failures.append('no_matching_rows')
+                  results.append({'request_id':req['request_id'],'source':req['url'],'final_url':final,'fetched_at_utc':now,'status_code':status,'content_type':ctype,'content_length':len(raw),'validation':{'passed':200<=status<300 and not failures,'failures':failures},'match_count':len(matches),'matches':matches[:50],'body_snippet':txt[:int(req.get('body_snippet_bytes',2000))]})
+              except Exception as e:
+                  results.append({'request_id':req['request_id'],'source':req['url'],'fetched_at_utc':now,'validation':{'passed':False,'failures':[repr(e)]},'match_count':0,'matches':[],'body_snippet':''})
+          out={'batch_id':root.get('batch_id',root.get('request_id')),'fetched_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'results':results}
           open('data/market-fetch-result.json','w',encoding='utf-8').write(json.dumps(out,ensure_ascii=False,indent=2))
           PY
       - name: Persist fetch result
