@@ -1,19 +1,19 @@
 {
-  "batch_id": "morning-preopen-20260820-batch1",
+  "batch_id": "morning-preopen-20260820-batch2",
   "requests": [
-    {"request_id":"tx-night","url":"https://openapi.taifex.com.tw/v1/DailyMarketReportFut","row_contains":["20260819","\"Contract\":\"TX\"","\"ContractMonth(Week)\":\"202608\"","\"TradingSession\":\"盤後\""],"expect":{"contains":["20260819","TX","202608","盤後"],"min_bytes":1000},"body_snippet_bytes":100},
-    {"request_id":"taifex-inst","url":"https://openapi.taifex.com.tw/v1/MarketDataOfMajorInstitutionalTradersDetailsOfFuturesContractsBytheDate","row_contains":["20260819"],"expect":{"contains":["20260819"],"min_bytes":100},"body_snippet_bytes":500},
-    {"request_id":"taifex-large","url":"https://openapi.taifex.com.tw/v1/OpenInterestOfLargeTradersFutures","row_contains":["20260819","TX"],"expect":{"contains":["20260819"],"min_bytes":100},"body_snippet_bytes":500},
-    {"request_id":"twse-t86-2330","url":"https://www.twse.com.tw/rwd/zh/fund/T86?date=20260819&selectType=ALL&response=json","row_contains":["2330"],"expect":{"contains":["2330"],"min_bytes":100},"body_snippet_bytes":500},
-    {"request_id":"twse-margin","url":"https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?date=20260819&selectType=ALL&response=json","expect":{"contains":["20260819"],"min_bytes":100},"body_snippet_bytes":12000},
-    {"request_id":"sox-close","url":"https://query1.finance.yahoo.com/v8/finance/chart/%5ESOX?period1=1787011200&period2=1787270400&interval=1d&includePrePost=false","extract_yahoo_at":"2026-08-19T13:30:00Z","body_snippet_bytes":100},
-    {"request_id":"tsm-close","url":"https://query1.finance.yahoo.com/v8/finance/chart/TSM?period1=1787011200&period2=1787270400&interval=1d&includePrePost=false","extract_yahoo_at":"2026-08-19T13:30:00Z","body_snippet_bytes":100},
-    {"request_id":"vix-close","url":"https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?period1=1787011200&period2=1787270400&interval=1d&includePrePost=false","extract_yahoo_at":"2026-08-19T13:30:00Z","body_snippet_bytes":100},
-    {"request_id":"wti-close","url":"https://query1.finance.yahoo.com/v8/finance/chart/CL%3DF?period1=1787011200&period2=1787270400&interval=1d&includePrePost=false","extract_yahoo_at":"2026-08-19T13:30:00Z","body_snippet_bytes":100},
-    {"request_id":"nikkei-0815","url":"https://query1.finance.yahoo.com/v8/finance/chart/%5EN225?period1=1787184000&period2=1787187600&interval=1m&includePrePost=false","extract_yahoo_at":"2026-08-20T00:15:00Z","body_snippet_bytes":100},
-    {"request_id":"kospi-0815","url":"https://query1.finance.yahoo.com/v8/finance/chart/%5EKS11?period1=1787184000&period2=1787187600&interval=1m&includePrePost=false","extract_yahoo_at":"2026-08-20T00:15:00Z","body_snippet_bytes":100},
-    {"request_id":"usdjpy-0815","url":"https://query1.finance.yahoo.com/v8/finance/chart/JPY%3DX?period1=1787184000&period2=1787187600&interval=1m&includePrePost=true","extract_yahoo_at":"2026-08-20T00:15:00Z","body_snippet_bytes":100},
-    {"request_id":"mnqu26-cme-0815","url":"https://query1.finance.yahoo.com/v8/finance/chart/MNQU26.CME?period1=1787184000&period2=1787187600&interval=1m&includePrePost=true","extract_yahoo_at":"2026-08-20T00:15:00Z","body_snippet_bytes":100},
-    {"request_id":"mnqu26-0815","url":"https://query1.finance.yahoo.com/v8/finance/chart/MNQU26?period1=1787184000&period2=1787187600&interval=1m&includePrePost=true","extract_yahoo_at":"2026-08-20T00:15:00Z","body_snippet_bytes":100}
+    {"request_id":"tx-night","url":"https://openapi.taifex.com.tw/v1/DailyMarketReportFut","row_contains":["20260819","\"Contract\":\"TX\"","\"ContractMonth(Week)\":\"202608\"","\"TradingSession\":\"盤後\""],"expect":{"contains":["20260819","TX","202608","盤後"],"min_bytes":1000},"body_snippet_bytes":100,"max_matches":3},
+    {"request_id":"taifex-inst","url":"https://openapi.taifex.com.tw/v1/MarketDataOfMajorInstitutionalTradersDetailsOfFuturesContractsBytheDate","row_contains":["20260819"],"expect":{"contains":["20260819"],"min_bytes":100},"body_snippet_bytes":300,"max_matches":10},
+    {"request_id":"taifex-large","url":"https://openapi.taifex.com.tw/v1/OpenInterestOfLargeTradersFutures","row_contains":["20260819","TX"],"expect":{"contains":["20260819"],"min_bytes":100},"body_snippet_bytes":300,"max_matches":10},
+    {"request_id":"twse-t86-2330","url":"https://www.twse.com.tw/rwd/zh/fund/T86?date=20260819&selectType=ALL&response=json","row_contains":["2330"],"expect":{"contains":["2330"],"min_bytes":100},"body_snippet_bytes":300,"max_matches":3},
+    {"request_id":"twse-margin","url":"https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?date=20260819&selectType=ALL&response=json","expect":{"contains":["20260819"],"min_bytes":100},"body_snippet_bytes":3000},
+    {"request_id":"sox-close","url":"https://query1.finance.yahoo.com/v8/finance/chart/%5ESOX?period1=1787011200&period2=1787270400&interval=1d&includePrePost=false","extract_yahoo_at":"2026-08-19T13:30:00Z","body_snippet_bytes":50},
+    {"request_id":"tsm-close","url":"https://query1.finance.yahoo.com/v8/finance/chart/TSM?period1=1787011200&period2=1787270400&interval=1d&includePrePost=false","extract_yahoo_at":"2026-08-19T13:30:00Z","body_snippet_bytes":50},
+    {"request_id":"vix-close","url":"https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?period1=1787011200&period2=1787270400&interval=1d&includePrePost=false","extract_yahoo_at":"2026-08-19T13:30:00Z","body_snippet_bytes":50},
+    {"request_id":"wti-close","url":"https://query1.finance.yahoo.com/v8/finance/chart/CL%3DF?period1=1787011200&period2=1787270400&interval=1d&includePrePost=false","extract_yahoo_at":"2026-08-19T13:30:00Z","body_snippet_bytes":50},
+    {"request_id":"nikkei-0815","url":"https://query1.finance.yahoo.com/v8/finance/chart/%5EN225?period1=1787184000&period2=1787187600&interval=1m&includePrePost=false","extract_yahoo_at":"2026-08-20T00:15:00Z","body_snippet_bytes":50},
+    {"request_id":"kospi-0815","url":"https://query1.finance.yahoo.com/v8/finance/chart/%5EKS11?period1=1787184000&period2=1787187600&interval=1m&includePrePost=false","extract_yahoo_at":"2026-08-20T00:15:00Z","body_snippet_bytes":50},
+    {"request_id":"usdjpy-0815","url":"https://query1.finance.yahoo.com/v8/finance/chart/JPY%3DX?period1=1787184000&period2=1787187600&interval=1m&includePrePost=true","extract_yahoo_at":"2026-08-20T00:15:00Z","body_snippet_bytes":50},
+    {"request_id":"mnqu26-cme-0815","url":"https://query1.finance.yahoo.com/v8/finance/chart/MNQU26.CME?period1=1787184000&period2=1787187600&interval=1m&includePrePost=true","extract_yahoo_at":"2026-08-20T00:15:00Z","body_snippet_bytes":50},
+    {"request_id":"mnqu26-0815","url":"https://query1.finance.yahoo.com/v8/finance/chart/MNQU26?period1=1787184000&period2=1787187600&interval=1m&includePrePost=true","extract_yahoo_at":"2026-08-20T00:15:00Z","body_snippet_bytes":50}
   ]
 }
